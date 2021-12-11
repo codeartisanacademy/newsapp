@@ -1,5 +1,5 @@
 import React, {useState} from 'react'
-import { View, Text, SafeAreaView, StyleSheet, TextInput, TouchableOpacity } from 'react-native'
+import { View, Text, SafeAreaView, StyleSheet, TextInput, TouchableOpacity, FlatList } from 'react-native'
 import axios from 'axios';
 
 const styles = StyleSheet.create({
@@ -23,12 +23,15 @@ const styles = StyleSheet.create({
         backgroundColor:'lightgrey',
         padding:10,
         borderRadius:8
+    },
+    newsItem:{
+        marginBottom:14,
     }
 })
 
 export default function Home() {
     const [search, setSearch] = useState(null);
-    const [results, setResults] = useState([]);
+    const [results, setResults] = useState();
 
     
     const getNews = ()=>{
@@ -44,11 +47,21 @@ export default function Home() {
 
         axios.request(options)
         .then((response)=>{
-            console.log(response.data);
+            console.log(response.data.articles);
             setResults(response.data);
+            
         })
         .catch(error=>console.log(error))
     }
+    const renderItem = ({item})=>{
+        return(
+            <View key={item.id} style={styles.newsItem}>
+                <Text>{item.title}</Text>
+                <Text>{item.author}  {item.rights}</Text> 
+            </View>
+        )
+    }
+
 
     return (
         <SafeAreaView>
@@ -61,13 +74,25 @@ export default function Home() {
                     </TouchableOpacity>
                 </View>
                 {
-                    results.length > 0 ? (
-                        <Text>We have some results</Text>
+                    results ?(
+                        results.articles.length > 0?(
+                            <FlatList
+                                data={results.articles}
+                                renderItem={renderItem} 
+                                keyExtractor={item=>item.id}
+                            />
+                        ):(
+                            <><Text>Your search results in no news</Text></>
+                        )
                     ):(
-                        <Text>We have no news</Text>
+                        <><Text>Please type keywords and search</Text></>
                     )
+                    
                 }
+                
+
+                         
             </View>
         </SafeAreaView>
     )
-}
+} 
